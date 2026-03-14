@@ -528,7 +528,8 @@ export interface UpdateQuestionInput extends CreateQuestionInput {
 }
 
 export interface CreateSessionInput {
-  deckId: string;
+  deckId?: string;
+  templateId?: string;
   classId: string;
 }
 

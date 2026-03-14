@@ -153,7 +153,7 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
     }));
   }
 
-  async function handleCreateDeck(templateId: string) {
+  async function handleCreateSessionFromTemplate(templateId: string) {
     const targetClass = dashboard.classes.find((classroom) => classroom.id === classId);
     const template = dashboard.templates.find((item) => item.id === templateId);
     if (!targetClass || !template) return;
@@ -161,14 +161,11 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
     setCreatingTemplateId(templateId);
     setMessage("");
     try {
-      await api.createDeck({
+      const session = await api.createSession({
         classId: targetClass.id,
-        title: template.title,
-        description: template.description,
         templateId
       });
-      setMessage(`Created a new deck in ${targetClass.name}.`);
-      router.refresh();
+      router.push(`/teacher/sessions/${session.id}`);
     } finally {
       setCreatingTemplateId(null);
     }
@@ -537,11 +534,11 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
             <p className="mt-3 text-sm leading-7 text-[#6d6585]">{template.description}</p>
             <p className="mt-4 text-sm text-[#8a82a2]">{template.slides.length} slides</p>
             <button
-              onClick={() => handleCreateDeck(template.id)}
+              onClick={() => handleCreateSessionFromTemplate(template.id)}
               disabled={creatingTemplateId === template.id || !classId}
               className="mt-5 rounded-full border border-[#ebe4ff] px-4 py-3 text-sm font-semibold text-[#2d2446] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {creatingTemplateId === template.id ? "Creating..." : "Create deck from template"}
+              {creatingTemplateId === template.id ? "Creating..." : "Create session from template"}
             </button>
           </article>
         ))}

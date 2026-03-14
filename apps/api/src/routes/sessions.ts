@@ -25,8 +25,11 @@ const updateDeckSchema = z.object({
 });
 
 const createSessionSchema = z.object({
-  deckId: z.string().min(1),
+  deckId: z.string().min(1).optional(),
+  templateId: z.string().min(1).optional(),
   classId: z.string().min(1)
+}).refine((value) => Boolean(value.deckId || value.templateId), {
+  message: "Either deckId or templateId is required."
 });
 
 const joinSessionSchema = z.object({
@@ -69,7 +72,11 @@ export async function registerSessionRoutes(app: FastifyInstance) {
 
   app.post("/api/sessions", async (request, reply) => {
     const input = (await validateSchema(createSessionSchema, request.body)) as CreateSessionInput;
-    return ok(reply, await skillzyStore.createSession(input), 201);
+    const session = await skillzyStore.createSession(input);
+    if (!session) {
+      return fail(reply, "session_source_not_found", "Pick a valid deck or template before creating a session.", 400);
+    }
+    return ok(reply, session, 201);
   });
 
   app.get("/api/sessions/:sessionId", async (request, reply) => {

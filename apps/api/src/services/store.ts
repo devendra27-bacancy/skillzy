@@ -1118,10 +1118,28 @@ export class SkillzyStore {
 
   async createSession(input: CreateSessionInput) {
     const state = await this.ensureReady();
+    let targetDeckId = input.deckId;
+
+    if (!targetDeckId && input.templateId) {
+      const seeded = seedDeckFromTemplate(input.templateId, input.classId);
+      if (seeded) {
+        state.decks.push(seeded.deck);
+        state.slides.push(...seeded.slides);
+        state.questions.push(...seeded.questions);
+        targetDeckId = seeded.deck.id;
+      }
+    }
+
+    if (!targetDeckId) {
+      return null;
+    }
+
+    const deck = state.decks.find((item) => item.id === targetDeckId) ?? null;
     const session: SkillzySession = {
       id: createId("session"),
-      deckId: input.deckId,
+      deckId: targetDeckId,
       classId: input.classId,
+      title: deck?.title,
       joinCode: createJoinCode(),
       status: "draft",
       currentSlideIndex: 0,
