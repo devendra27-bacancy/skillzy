@@ -140,6 +140,7 @@ export function StudentSession({
   const [advancing, setAdvancing] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const questionStartedAtRef = useRef<number | null>(null);
+  const progressFloorRef = useRef(0);
 
   const participantId =
     typeof window !== "undefined" ? localStorage.getItem("skillzyParticipantId") ?? "" : "";
@@ -172,13 +173,35 @@ export function StudentSession({
     (orderedQuestions.length > 0 && orderedQuestions.every((question) => Boolean(question.timer?.enabled)));
 
   useEffect(() => {
+    progressFloorRef.current = Math.max(progressFloorRef.current, currentQuestionIndex);
+  }, [currentQuestionIndex]);
+
+  useEffect(() => {
     socket.connect();
     const handleConnect = () => setConnectionState("connected");
     const handleDisconnect = () => setConnectionState("reconnecting");
 
     socket.emit("session:subscribe", sessionId);
     socket.on(SESSION_STATE_EVENT, (nextSnapshot: SessionSnapshot | null) => {
-      if (nextSnapshot) setSnapshot(nextSnapshot);
+      if (!nextSnapshot) return;
+      if (!participantId) {
+        setSnapshot(nextSnapshot);
+        return;
+      }
+
+      const nextParticipant = nextSnapshot.participants.find((item) => item.id === participantId);
+      if (!nextParticipant) {
+        setSnapshot(nextSnapshot);
+        return;
+      }
+
+      const guardedQuestionIndex = Math.max(nextParticipant.currentQuestionIndex ?? 0, progressFloorRef.current);
+      setSnapshot({
+        ...nextSnapshot,
+        participants: nextSnapshot.participants.map((item) =>
+          item.id === participantId ? { ...item, currentQuestionIndex: guardedQuestionIndex } : item
+        )
+      });
     });
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
@@ -188,7 +211,7 @@ export function StudentSession({
       socket.off("disconnect", handleDisconnect);
       socket.disconnect();
     };
-  }, [sessionId]);
+  }, [participantId, sessionId]);
 
   useEffect(() => {
     setSubmitted(hasAnsweredCurrentQuestion);
@@ -232,6 +255,13 @@ export function StudentSession({
 
   async function advanceToNextQuestion(nextIndex: number) {
     if (!participantId) return;
+    progressFloorRef.current = Math.max(progressFloorRef.current, nextIndex);
+    setSnapshot((currentSnapshot) => ({
+      ...currentSnapshot,
+      participants: currentSnapshot.participants.map((item) =>
+        item.id === participantId ? { ...item, currentQuestionIndex: progressFloorRef.current } : item
+      )
+    }));
     const nextSnapshot = await api.updateParticipantProgress(sessionId, participantId, nextIndex);
     setSnapshot(nextSnapshot);
   }
@@ -332,13 +362,6 @@ export function StudentSession({
       payload
     });
 
-    socket.emit("response:submit", {
-      sessionId,
-      questionId: activeQuestion.id,
-      participantId,
-      type: activeQuestion.type,
-      payload
-    });
     setAdvancing(true);
     await advanceToNextQuestion(currentQuestionIndex + 1);
     setAdvancing(false);
