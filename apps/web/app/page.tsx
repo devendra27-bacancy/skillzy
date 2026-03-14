@@ -1,62 +1,41 @@
-import Link from "next/link";
-import { BrandHeader } from "../components/brand";
+import { redirect } from "next/navigation";
 import { GoogleSignInButton } from "../components/google-sign-in-button";
-import { AppShell, CreamCard } from "../components/shell";
-import { SignOutButton } from "../components/sign-out-button";
-import { StudentJoinForm } from "../components/student-join-form";
+import { AppShell } from "../components/shell";
 import { createSupabaseServerClient } from "../lib/supabase/server";
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams
+}: {
+  searchParams: Promise<{ code?: string; next?: string }>;
+}) {
+  const params = await searchParams;
+  if (params.code) {
+    const next = params.next ? `&next=${encodeURIComponent(params.next)}` : "";
+    redirect(`/auth/callback?code=${encodeURIComponent(params.code)}${next}`);
+  }
+
   const supabase = await createSupabaseServerClient();
   const authResult = supabase ? await supabase.auth.getUser() : null;
   const authUser = authResult?.data.user ?? null;
 
   return (
-    <AppShell className="flex flex-col justify-center">
-      <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.95fr]">
-        <div className="space-y-6">
-          <BrandHeader
-            eyebrow="Skillzy classroom"
-            title="Teach live lessons that students actually lean into."
-            subtitle="Join by code, answer in real time, and let teachers see understanding unfold slide by slide."
-          />
-          <div className="flex flex-wrap gap-3">
-            <Link href="/teacher" className="rounded-full bg-white px-5 py-3 font-semibold text-skillzy-ink">
-              Teacher dashboard
-            </Link>
-            <Link
-              href="/student"
-              className="rounded-full border border-white/15 px-5 py-3 font-semibold text-white"
-            >
-              Student dashboard
-            </Link>
-            {authUser ? (
-              <SignOutButton />
-            ) : (
-              <>
-                <GoogleSignInButton next="/teacher" label="Teacher Google sign-in" />
-                <GoogleSignInButton next="/student" label="Student Google sign-in" />
-              </>
-            )}
-            <span className="rounded-full border border-white/15 px-5 py-3 text-white/80">
-              PWA-ready mobile classroom
-            </span>
-          </div>
+    <AppShell className="flex min-h-screen items-center justify-center">
+      <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-black/20 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur">
+        <div className="space-y-4 text-center">
+          <p className="text-sm uppercase tracking-[0.28em] text-white/60">Skillzy</p>
+          <h1 className="text-4xl font-semibold text-white">Sign in</h1>
           {authUser ? (
-            <p className="text-sm text-white/65">Signed in as {authUser.email}</p>
-          ) : null}
+            <p className="text-sm text-white/70">Signed in as {authUser.email}</p>
+          ) : (
+            <p className="text-sm text-white/70">
+              Choose whether you want to continue into the teacher or student workspace.
+            </p>
+          )}
         </div>
-
-        <CreamCard className="ticket-notch pt-10">
-          <p className="text-sm uppercase tracking-[0.25em] text-skillzy-soft">Student entry</p>
-          <h2 className="mt-2 text-3xl font-semibold">Join a live session</h2>
-          <p className="mt-3 text-skillzy-soft">
-            Students do not need accounts. A join code and name are enough to enter the room and stay synced.
-          </p>
-          <div className="mt-6">
-            <StudentJoinForm />
-          </div>
-        </CreamCard>
+        <div className="mt-8 grid gap-3">
+          <GoogleSignInButton next="/teacher" label="Teacher Google sign-in" />
+          <GoogleSignInButton next="/student" label="Student Google sign-in" />
+        </div>
       </div>
     </AppShell>
   );
