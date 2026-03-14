@@ -169,31 +169,6 @@ export function TeacherDashboard({ dashboard, bundles, authProfile }: DashboardP
           </div>
         </section>
 
-        {effectiveSessionRows.length === 0 ? (
-          <section className="rounded-[1.8rem] bg-white p-6 shadow-[0_18px_50px_rgba(95,73,166,0.09)]">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#9288b2]">Sample preview</p>
-            <div className="mt-5 overflow-hidden rounded-[1.6rem] border border-[#efe9ff] bg-[#faf7ff]">
-              <div className="grid gap-4 border-b border-[#efe9ff] px-5 py-4 sm:grid-cols-[1.4fr_repeat(4,0.7fr)]">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#988eaf]">Session</span>
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#988eaf]">Status</span>
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#988eaf]">Date</span>
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#988eaf]">Questions</span>
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#988eaf]">Students</span>
-              </div>
-              <div className="grid gap-4 px-5 py-5 text-sm text-[#4d4765] sm:grid-cols-[1.4fr_repeat(4,0.7fr)]">
-                <div>
-                  <p className="font-semibold text-[#211b35]">Design sprint warm-up</p>
-                  <p className="mt-1 text-[#7a7196]">Example of how your sessions will appear here.</p>
-                </div>
-                <StatusBadge status="draft" />
-                <span>Today</span>
-                <span>3</span>
-                <span>24</span>
-              </div>
-            </div>
-          </section>
-        ) : null}
-
         <section className="rounded-[1.8rem] bg-white p-6 shadow-[0_18px_50px_rgba(95,73,166,0.09)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>

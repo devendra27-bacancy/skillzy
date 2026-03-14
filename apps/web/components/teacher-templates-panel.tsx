@@ -202,7 +202,8 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
         classId: targetClass.id,
         templateId
       });
-      router.push(`/teacher/sessions/${session.id}`);
+      window.open(`/teacher/sessions/${session.id}`, "_blank", "noopener,noreferrer");
+      setMessage("Session created in a new tab.");
     } finally {
       setCreatingTemplateId(null);
     }
