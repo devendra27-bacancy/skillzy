@@ -51,6 +51,10 @@ class SessionRuntimeManager {
     }
   }
 
+  async broadcastSessionState(sessionId: string) {
+    await this.emitSnapshot(sessionId);
+  }
+
   async startSession(sessionId: string) {
     const snapshot = await skillzyStore.getSessionSnapshot(sessionId);
     if (!snapshot) return null;

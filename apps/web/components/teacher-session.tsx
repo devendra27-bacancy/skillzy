@@ -92,6 +92,8 @@ export function TeacherSession({ initialSnapshot }: { initialSnapshot: SessionSn
   );
   const [exportCsv, setExportCsv] = useState("");
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [busyAction, setBusyAction] = useState<"start" | "end" | "export" | "copy" | null>(null);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     socket.connect();
@@ -267,17 +269,49 @@ export function TeacherSession({ initialSnapshot }: { initialSnapshot: SessionSn
   }
 
   async function startSession() {
-    await api.startSession(snapshot.session.id);
-    setSnapshot(await api.getSession(snapshot.session.id));
+    setBusyAction("start");
+    setMessage("");
+    try {
+      await api.startSession(snapshot.session.id);
+      setSnapshot(await api.getSession(snapshot.session.id));
+      setMessage(timedSession ? "Timed quiz started for the class." : "Session started.");
+    } finally {
+      setBusyAction(null);
+    }
   }
 
   async function endSession() {
-    await api.endSession(snapshot.session.id);
-    setSnapshot(await api.getSession(snapshot.session.id));
+    setBusyAction("end");
+    setMessage("");
+    try {
+      await api.endSession(snapshot.session.id);
+      setSnapshot(await api.getSession(snapshot.session.id));
+      setMessage(timedSession ? "Quiz ended and results revealed." : "Session ended.");
+    } finally {
+      setBusyAction(null);
+    }
   }
 
   async function handleExport() {
-    setExportCsv(await api.exportSession(snapshot.session.id));
+    setBusyAction("export");
+    setMessage("");
+    try {
+      setExportCsv(await api.exportSession(snapshot.session.id));
+      setMessage("CSV export generated below.");
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function copyJoinCode() {
+    setBusyAction("copy");
+    setMessage("");
+    try {
+      await navigator.clipboard.writeText(snapshot.session.joinCode);
+      setMessage(`Join code ${snapshot.session.joinCode} copied.`);
+    } finally {
+      setBusyAction(null);
+    }
   }
 
   return (
@@ -301,6 +335,11 @@ export function TeacherSession({ initialSnapshot }: { initialSnapshot: SessionSn
             </span>
           </div>
           <p className="mt-4 text-skillzy-soft">{currentSlide?.title}</p>
+          {message ? (
+            <div className="mt-4 rounded-[1.2rem] bg-[#f4efff] px-4 py-3 text-sm text-[#5f47a6]">
+              {message}
+            </div>
+          ) : null}
           {timedSession ? (
             <div className="mt-5 rounded-[1.5rem] bg-white/70 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -342,20 +381,40 @@ export function TeacherSession({ initialSnapshot }: { initialSnapshot: SessionSn
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               onClick={startSession}
-              disabled={snapshot.session.status === "live"}
+              disabled={snapshot.session.status === "live" || busyAction !== null}
               className="rounded-full bg-skillzy-ink px-4 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {timedSession ? "Start timed quiz" : "Start session"}
+              {busyAction === "start"
+                ? "Starting..."
+                : timedSession
+                  ? "Start timed quiz"
+                  : "Start session"}
             </button>
-            <button onClick={endSession} className="rounded-full border border-black/10 px-4 py-3">
-              {timedSession ? "End quiz now" : "End session"}
+            <button
+              onClick={endSession}
+              disabled={busyAction !== null || snapshot.session.status === "draft"}
+              className="rounded-full border border-black/10 px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {busyAction === "end" ? "Ending..." : timedSession ? "End quiz now" : "End session"}
             </button>
-            <button onClick={handleExport} className="rounded-full border border-black/10 px-4 py-3">
-              Export CSV
+            <button
+              onClick={copyJoinCode}
+              disabled={busyAction !== null}
+              className="rounded-full border border-black/10 px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {busyAction === "copy" ? "Copying..." : "Copy join code"}
+            </button>
+            <button
+              onClick={handleExport}
+              disabled={busyAction !== null}
+              className="rounded-full border border-black/10 px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {busyAction === "export" ? "Exporting..." : "Export CSV"}
             </button>
             {!timedSession ? (
               <button
                 onClick={() => sendControl("toggle-results")}
+                disabled={busyAction !== null || snapshot.session.status !== "live"}
                 className="rounded-full border border-black/10 px-4 py-3"
               >
                 {snapshot.session.revealResults ? "Hide results" : "Reveal results"}
@@ -426,6 +485,14 @@ export function TeacherSession({ initialSnapshot }: { initialSnapshot: SessionSn
           <div className="mt-4 grid grid-cols-2 gap-3">
             <Metric label="Students joined" value={snapshot.participants.length} />
             <Metric label="Responses" value={snapshot.responses.length} />
+            <Metric
+              label="Answered current"
+              value={
+                activeQuestion
+                  ? snapshot.responses.filter((response) => response.questionId === activeQuestion.id).length
+                  : 0
+              }
+            />
             <Metric
               label={timedSession ? "Students are on" : "Active slide"}
               value={

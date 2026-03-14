@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { fail, ok } from "./helpers";
 import { validateSchema } from "../middleware/validateSchema";
+import { sessionRuntime } from "../services/session-runtime";
 import { skillzyStore } from "../services/store";
 
 const updateParticipantProgressSchema = z.object({
@@ -21,6 +22,7 @@ export async function registerParticipantRoutes(app: FastifyInstance) {
       return fail(reply, "participant_not_found", "Participant not found.", 404);
     }
     const snapshot = await skillzyStore.getSessionSnapshot(sessionId);
+    await sessionRuntime.broadcastSessionState(sessionId);
     return ok(reply, snapshot ?? participant);
   });
 }

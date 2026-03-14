@@ -1,5 +1,4 @@
-import { AppShell } from "../../../components/shell";
-import { GoogleSignInButton } from "../../../components/google-sign-in-button";
+import { TeacherAuthGate } from "../../../components/teacher-auth-gate";
 import { TeacherSecondaryPage } from "../../../components/teacher-secondary-page";
 import { getTeacherRouteData } from "../../../lib/teacher-page-data";
 
@@ -7,11 +6,7 @@ export default async function TeacherSettingsPage() {
   const routeData = await getTeacherRouteData();
 
   if (!routeData) {
-    return (
-      <AppShell className="max-w-2xl pt-16">
-        <GoogleSignInButton next="/teacher/settings" />
-      </AppShell>
-    );
+    return <TeacherAuthGate next="/teacher/settings" title="Open settings" description="Sign in to review your teacher profile and workspace readiness." />;
   }
 
   return (
@@ -40,7 +35,7 @@ export default async function TeacherSettingsPage() {
               <div key={check.id} className="flex items-center justify-between rounded-[1.3rem] bg-[#faf7ff] px-4 py-4">
                 <div>
                   <p className="text-sm font-semibold text-[#1d1731]">{check.label}</p>
-                  <p className="text-xs text-[#8a82a2]">{check.complete ? "Ready" : "Open task"}</p>
+                  <p className="text-xs text-[#8a82a2]">{check.complete ? "Ready" : "Needs setup"}</p>
                 </div>
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${

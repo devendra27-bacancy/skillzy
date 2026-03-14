@@ -1,6 +1,5 @@
 import type { DashboardData, DeckBundle } from "@skillzy/types";
-import { GoogleSignInButton } from "../../components/google-sign-in-button";
-import { AppShell } from "../../components/shell";
+import { TeacherAuthGate } from "../../components/teacher-auth-gate";
 import { TeacherDashboard } from "../../components/teacher-dashboard";
 import { API_URL } from "../../lib/api";
 import { unwrapApiResult } from "../../lib/api-result";
@@ -23,18 +22,11 @@ export default async function TeacherPage() {
 
   if (!authUser) {
     return (
-      <AppShell className="max-w-3xl pt-16">
-        <div className="space-y-6">
-          <p className="text-sm uppercase tracking-[0.25em] text-white/60">Teacher mode</p>
-          <h1 className="text-4xl font-semibold text-white sm:text-5xl">
-            Sign in with Google to open your Skillzy workspace.
-          </h1>
-          <p className="max-w-2xl text-white/70">
-            Supabase Auth is now live for the teacher portal. Use your Google account to continue.
-          </p>
-          <GoogleSignInButton />
-        </div>
-      </AppShell>
+      <TeacherAuthGate
+        next="/teacher"
+        title="Open your teacher workspace"
+        description="Sign in once to create sessions, manage templates, run live quizzes, and export reports."
+      />
     );
   }
 

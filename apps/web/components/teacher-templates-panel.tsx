@@ -122,12 +122,30 @@ function transformJsonTemplate(payload: JsonTemplatePayload): CreateLessonTempla
 
 export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData }) {
   const router = useRouter();
-  const [classId, setClassId] = useState(dashboard.classes[0]?.id ?? "");
+  const classId = dashboard.classes[0]?.id ?? "";
   const [creatingTemplateId, setCreatingTemplateId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [customTemplate, setCustomTemplate] = useState<CreateLessonTemplateInput>(createEmptyTemplate);
   const [isSavingCustomTemplate, setIsSavingCustomTemplate] = useState(false);
   const [jsonTemplate, setJsonTemplate] = useState("");
+  const sampleJsonTemplate = `{
+  "templateTitle": "Easy India Quiz",
+  "subject": "General Knowledge",
+  "gradeBand": "Grades 3-5",
+  "templatePurpose": "This template is for a very easy quiz test based on India.",
+  "anonymous": true,
+  "timer": true,
+  "timerDuration": 45,
+  "questions": [
+    {
+      "slideTitle": "Question 1",
+      "questionPrompt": "What is the capital of India?",
+      "slideInstructionsOrContext": "Choose the correct answer.",
+      "options": ["New Delhi", "Mumbai", "Kolkata", "Chennai"],
+      "correctAnswer": "Option 1"
+    }
+  ]
+}`;
 
   function updateSlide(index: number, updater: (slide: CreateTemplateSlideInput) => CreateTemplateSlideInput) {
     setCustomTemplate((current) => ({
@@ -244,6 +262,12 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
           className="mt-4 min-h-56 w-full rounded-[1.3rem] border border-[#ebe4ff] bg-white px-4 py-3 font-mono text-sm text-[#1a1630] outline-none placeholder:text-[#8a82a2]"
         />
         <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            onClick={() => setJsonTemplate(sampleJsonTemplate)}
+            className="rounded-full border border-[#ebe4ff] px-5 py-3 text-sm font-semibold text-[#2d2446]"
+          >
+            Use sample JSON
+          </button>
           <button
             onClick={handleLoadJsonTemplate}
             className="rounded-full border border-[#ebe4ff] px-5 py-3 text-sm font-semibold text-[#2d2446]"
@@ -592,23 +616,15 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
           >
             Reset
           </button>
-        </div>
-      </section>
-
-      <section className="rounded-[1.8rem] bg-white p-6 shadow-[0_18px_50px_rgba(95,73,166,0.09)]">
-        <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#9288b2]">Target class</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {dashboard.classes.map((classroom) => (
-            <button
-              key={classroom.id}
-              onClick={() => setClassId(classroom.id)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                classroom.id === classId ? "bg-[#8b62ff] text-white" : "bg-[#f4f0ff] text-[#6f6787]"
-              }`}
-            >
-              {classroom.name}
-            </button>
-          ))}
+          <button
+            onClick={() => {
+              setCustomTemplate(transformJsonTemplate(JSON.parse(sampleJsonTemplate) as JsonTemplatePayload));
+              setMessage("Sample quiz loaded into the builder.");
+            }}
+            className="rounded-full border border-[#ebe4ff] px-5 py-3 text-sm font-semibold text-[#2d2446]"
+          >
+            Load sample into builder
+          </button>
         </div>
       </section>
 
@@ -626,6 +642,14 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
             </h2>
             <p className="mt-3 text-sm leading-7 text-[#6d6585]">{template.description}</p>
             <p className="mt-4 text-sm text-[#8a82a2]">{template.slides.length} slides</p>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#988eaf]">
+              <span className="rounded-full bg-[#f5f1ff] px-3 py-1">{template.gradeBand}</span>
+              {template.timer ? (
+                <span className="rounded-full bg-[#fff4df] px-3 py-1 text-[#c17b1b]">
+                  {template.timerDuration ?? 45}s timer
+                </span>
+              ) : null}
+            </div>
             <button
               onClick={() => handleCreateSessionFromTemplate(template.id)}
               disabled={creatingTemplateId === template.id || !classId}

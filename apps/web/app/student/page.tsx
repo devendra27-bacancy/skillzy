@@ -11,17 +11,23 @@ export default async function StudentPage() {
 
   if (!authUser) {
     return (
-      <AppShell className="max-w-3xl pt-16">
-        <div className="space-y-6">
-          <p className="text-sm uppercase tracking-[0.25em] text-white/60">Student mode</p>
-          <h1 className="text-4xl font-semibold text-white sm:text-5xl">
-            Sign in with Google to open your student dashboard.
-          </h1>
-          <p className="max-w-2xl text-white/70">
-            Students can still join with a code only, but Google sign-in gives them a dedicated dashboard.
+      <AppShell className="max-w-2xl pt-16">
+        <CreamCard className="ticket-notch pt-10">
+          <p className="text-sm uppercase tracking-[0.25em] text-skillzy-soft">Student workspace</p>
+          <h1 className="mt-2 text-3xl font-semibold">Open your student workspace</h1>
+          <p className="mt-3 max-w-xl text-skillzy-soft">
+            Sign in with Google to keep your identity ready for live quizzes, or go back home if you only need the join flow.
           </p>
-          <GoogleSignInButton next="/student" label="Continue with Google as student" />
-        </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <GoogleSignInButton next="/student" label="Continue with Google" />
+            <a
+              href="/"
+              className="rounded-full border border-black/10 px-5 py-3 font-semibold text-skillzy-ink"
+            >
+              Back home
+            </a>
+          </div>
+        </CreamCard>
       </AppShell>
     );
   }
@@ -41,7 +47,7 @@ export default async function StudentPage() {
             Welcome, {displayName}
           </h1>
           <p className="mt-2 text-white/70">
-            Signed in with {authUser.email}. Join live classes, track your participation, and keep your learning flow in one place.
+            Signed in as {authUser.email}. Join live classes and move straight into the active quiz flow.
           </p>
         </div>
         <SignOutButton />

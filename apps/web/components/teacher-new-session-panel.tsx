@@ -3,7 +3,7 @@
 import type { DashboardData, Deck, LessonTemplate } from "@skillzy/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
 
 export function TeacherNewSessionPanel({ dashboard }: { dashboard: DashboardData }) {
@@ -19,10 +19,33 @@ export function TeacherNewSessionPanel({ dashboard }: { dashboard: DashboardData
     () => dashboard.decks.filter((deck) => deck.classId === classId),
     [classId, dashboard.decks]
   );
+  const selectedTemplate = dashboard.templates.find((template) => template.id === templateId) ?? dashboard.templates[0] ?? null;
+  const selectedDeck = classDecks.find((deck) => deck.id === deckId) ?? classDecks[0] ?? null;
+
+  useEffect(() => {
+    if (!classId && dashboard.classes[0]?.id) {
+      setClassId(dashboard.classes[0].id);
+    }
+  }, [classId, dashboard.classes]);
+
+  useEffect(() => {
+    if (sourceType === "template") {
+      const nextTemplateId = dashboard.templates[0]?.id ?? "";
+      if (!templateId || !dashboard.templates.some((template) => template.id === templateId)) {
+        setTemplateId(nextTemplateId);
+      }
+      return;
+    }
+
+    const nextDeckId = classDecks[0]?.id ?? "";
+    if (!deckId || !classDecks.some((deck) => deck.id === deckId)) {
+      setDeckId(nextDeckId);
+    }
+  }, [classDecks, dashboard.templates, deckId, sourceType, templateId]);
 
   async function handleCreateSession() {
-    const targetDeck = classDecks.find((deck) => deck.id === deckId) ?? classDecks[0];
-    const targetTemplate = dashboard.templates.find((template) => template.id === templateId) ?? dashboard.templates[0];
+    const targetDeck = selectedDeck;
+    const targetTemplate = selectedTemplate;
     setSubmitting(true);
     setMessage("");
     try {
@@ -43,6 +66,26 @@ export function TeacherNewSessionPanel({ dashboard }: { dashboard: DashboardData
     }
   }
 
+  if (dashboard.classes.length === 0) {
+    return (
+      <section className="rounded-[1.8rem] bg-white p-6 shadow-[0_18px_50px_rgba(95,73,166,0.09)]">
+        <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#9288b2]">New session</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a1630]">
+          Create a class first
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-[#6d6585]">
+          Sessions need a class so join codes, reports, and templates stay scoped to the right group.
+        </p>
+        <Link
+          href="/teacher/classes"
+          className="mt-5 inline-flex rounded-full bg-[#8b62ff] px-5 py-3 text-sm font-semibold text-white"
+        >
+          Open classes
+        </Link>
+      </section>
+    );
+  }
+
   return (
     <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
       <section className="rounded-[1.8rem] bg-white p-6 shadow-[0_18px_50px_rgba(95,73,166,0.09)]">
@@ -57,6 +100,7 @@ export function TeacherNewSessionPanel({ dashboard }: { dashboard: DashboardData
               onClick={() => {
                 setClassId(classroom.id);
                 setDeckId("");
+                setMessage("");
               }}
               className={`rounded-full px-4 py-2 text-sm font-semibold ${
                 classroom.id === classId ? "bg-[#8b62ff] text-white" : "bg-[#f4f0ff] text-[#6f6787]"
@@ -137,12 +181,40 @@ export function TeacherNewSessionPanel({ dashboard }: { dashboard: DashboardData
           )}
         </div>
 
+        <div className="mt-5 rounded-[1.3rem] border border-[#f1ebff] bg-[#fbf9ff] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#988eaf]">
+            Selected source
+          </p>
+          {sourceType === "template" && selectedTemplate ? (
+            <>
+              <p className="mt-2 font-semibold text-[#201936]">{selectedTemplate.title}</p>
+              <p className="mt-1 text-sm text-[#6d6585]">{selectedTemplate.description}</p>
+              <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[#988eaf]">
+                {selectedTemplate.slides.length} questions
+              </p>
+            </>
+          ) : null}
+          {sourceType === "deck" && selectedDeck ? (
+            <>
+              <p className="mt-2 font-semibold text-[#201936]">{selectedDeck.title}</p>
+              <p className="mt-1 text-sm text-[#6d6585]">{selectedDeck.description}</p>
+            </>
+          ) : null}
+          {sourceType === "template" && !selectedTemplate ? (
+            <p className="mt-2 text-sm text-[#6d6585]">No template selected yet.</p>
+          ) : null}
+          {sourceType === "deck" && !selectedDeck ? (
+            <p className="mt-2 text-sm text-[#6d6585]">No deck available in this class yet.</p>
+          ) : null}
+        </div>
+
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <button
             onClick={handleCreateSession}
             disabled={
               submitting ||
-              (sourceType === "template" ? dashboard.templates.length === 0 : classDecks.length === 0)
+              !classId ||
+              (sourceType === "template" ? !selectedTemplate : !selectedDeck)
             }
             className="rounded-full bg-[#8b62ff] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
           >

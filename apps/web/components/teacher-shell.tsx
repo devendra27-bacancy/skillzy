@@ -16,10 +16,11 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { id: "dashboard", label: "Dashboard", href: "/teacher", icon: <GridIcon /> },
+  { id: "classes", label: "Classes", href: "/teacher/classes", icon: <BookIcon /> },
   { id: "new-session", label: "New Session", href: "/teacher/new-session", icon: <PlayIcon /> },
   { id: "templates", label: "Templates", href: "/teacher/templates", icon: <StackIcon /> },
-  { id: "settings", label: "Settings", href: "/teacher/settings", icon: <CogIcon /> },
-  { id: "reports", label: "Reports", href: "/teacher/reports", icon: <ChartIcon />, stub: true }
+  { id: "reports", label: "Reports", href: "/teacher/reports", icon: <ChartIcon /> },
+  { id: "settings", label: "Settings", href: "/teacher/settings", icon: <CogIcon /> }
 ];
 
 export function TeacherShell({
@@ -42,18 +43,29 @@ export function TeacherShell({
   children: ReactNode;
   rightRail?: ReactNode;
 }) {
+  const activeItem = navItems.find((item) => item.id === activeNav);
+  const pageTitle = activeItem?.label ?? "Teacher Workspace";
+  const pageDescriptions: Record<string, string> = {
+    dashboard: "Launch sessions, reuse templates, and keep the classroom flow moving.",
+    classes: "Manage class readiness, deck coverage, and teaching momentum in one place.",
+    "new-session": "Start a live room quickly from a template or an existing deck.",
+    templates: "Build, import, and reuse quiz templates without extra setup steps.",
+    reports: "Review completed runs and export what you need after class.",
+    settings: "Keep your profile and workspace setup tidy."
+  };
+
   return (
     <div className="min-h-screen bg-[#ece5ff] text-[#16131f]">
       <div
         className={clsx(
-          "mx-auto min-h-screen max-w-[1500px] gap-4 bg-[#f7f5ff] p-3 shadow-[0_30px_120px_rgba(94,69,169,0.12)] lg:p-4",
+          "mx-auto max-w-[1500px] gap-4 bg-[#f7f5ff] p-3 shadow-[0_30px_120px_rgba(94,69,169,0.12)] lg:p-4",
           rightRail
             ? "grid lg:grid-cols-[260px_minmax(0,1fr)_320px]"
             : "grid lg:grid-cols-[240px_minmax(0,1fr)]"
         )}
       >
-        <aside className="flex flex-col justify-between rounded-[2rem] bg-white/85 p-5 shadow-[0_18px_50px_rgba(95,73,166,0.09)]">
-          <div>
+        <aside className="flex h-fit max-h-[calc(100vh-2rem)] flex-col rounded-[2rem] bg-white/85 p-5 shadow-[0_18px_50px_rgba(95,73,166,0.09)] lg:sticky lg:top-4">
+          <div className="overflow-y-auto pr-1">
             <Link href="/teacher" className="flex items-center gap-3">
               <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#f4eeff] via-[#ede4ff] to-[#fff4e4] shadow-inner">
                 <div className="relative h-7 w-7 overflow-hidden rounded-xl">
@@ -105,13 +117,6 @@ export function TeacherShell({
               })}
             </nav>
           </div>
-
-          <div className="rounded-[1.5rem] border border-[#eee7ff] bg-[#faf7ff] p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#948aad]">Workspace</p>
-            <p className="mt-3 text-sm leading-6 text-[#6d6585]">
-              Launch a live session, reuse a template, and keep lesson delivery moving from one place.
-            </p>
-          </div>
         </aside>
 
         <section className="min-w-0 rounded-[2rem] bg-white/82 p-4 shadow-[0_18px_50px_rgba(95,73,166,0.09)] sm:p-5">
@@ -119,10 +124,10 @@ export function TeacherShell({
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#9288b2]">Teacher workspace</p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#1a1630] sm:text-[2.4rem]">
-                {activeNav === "dashboard" ? "Dashboard" : profile.name.split(" ")[0]}
+                {pageTitle}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[#68607f]">
-                Keep sessions, templates, and settings aligned without leaving the studio.
+                {pageDescriptions[activeNav] ?? "Keep sessions, templates, and settings aligned without leaving the studio."}
               </p>
             </div>
             {headerAction ? <div className="shrink-0">{headerAction}</div> : null}

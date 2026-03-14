@@ -1,5 +1,4 @@
-import { AppShell } from "../../../components/shell";
-import { GoogleSignInButton } from "../../../components/google-sign-in-button";
+import { TeacherAuthGate } from "../../../components/teacher-auth-gate";
 import { TeacherSecondaryPage } from "../../../components/teacher-secondary-page";
 import { getTeacherRouteData } from "../../../lib/teacher-page-data";
 
@@ -7,11 +6,7 @@ export default async function TeacherClassesPage() {
   const routeData = await getTeacherRouteData();
 
   if (!routeData) {
-    return (
-      <AppShell className="max-w-2xl pt-16">
-        <GoogleSignInButton next="/teacher/classes" />
-      </AppShell>
-    );
+    return <TeacherAuthGate next="/teacher/classes" title="Open classes" description="Sign in to manage class setup, roster readiness, and live-session context." />;
   }
 
   return (

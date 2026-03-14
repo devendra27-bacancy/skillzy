@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { AppShell } from "../../../components/shell";
-import { GoogleSignInButton } from "../../../components/google-sign-in-button";
+import { TeacherAuthGate } from "../../../components/teacher-auth-gate";
 import { TeacherSecondaryPage } from "../../../components/teacher-secondary-page";
 import { getTeacherRouteData } from "../../../lib/teacher-page-data";
 
@@ -8,11 +7,7 @@ export default async function TeacherHistoryPage() {
   const routeData = await getTeacherRouteData();
 
   if (!routeData) {
-    return (
-      <AppShell className="max-w-2xl pt-16">
-        <GoogleSignInButton next="/teacher/history" />
-      </AppShell>
-    );
+    return <TeacherAuthGate next="/teacher/history" title="Open session history" description="Sign in to review previous live runs, drafts, and summaries." />;
   }
 
   const sessions = [...routeData.dashboard.sessions]

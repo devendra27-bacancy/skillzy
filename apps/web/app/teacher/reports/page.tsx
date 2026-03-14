@@ -1,19 +1,14 @@
 import Link from "next/link";
-import { AppShell } from "../../../components/shell";
-import { GoogleSignInButton } from "../../../components/google-sign-in-button";
+import { TeacherAuthGate } from "../../../components/teacher-auth-gate";
+import { SessionExportButton } from "../../../components/session-export-button";
 import { TeacherSecondaryPage } from "../../../components/teacher-secondary-page";
-import { API_URL } from "../../../lib/api";
 import { getTeacherRouteData } from "../../../lib/teacher-page-data";
 
 export default async function TeacherReportsPage() {
   const routeData = await getTeacherRouteData();
 
   if (!routeData) {
-    return (
-      <AppShell className="max-w-2xl pt-16">
-        <GoogleSignInButton next="/teacher/reports" />
-      </AppShell>
-    );
+    return <TeacherAuthGate next="/teacher/reports" title="Open reports" description="Sign in to review completed sessions and export response data." />;
   }
 
   const completedSessions = routeData.dashboard.sessions.filter((session) => session.status === "ended");
@@ -56,12 +51,7 @@ export default async function TeacherReportsPage() {
                     >
                       Open session
                     </Link>
-                    <a
-                      href={`${API_URL}/api/sessions/${session.id}/export`}
-                      className="rounded-full bg-[#1f1832] px-4 py-3 text-sm font-semibold text-white"
-                    >
-                      Download CSV
-                    </a>
+                    <SessionExportButton sessionId={session.id} />
                   </div>
                 </div>
               </article>
