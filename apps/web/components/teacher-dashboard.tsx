@@ -20,7 +20,7 @@ interface DashboardProps {
 
 type SessionRow = {
   session: Session;
-  deckTitle: string;
+  sessionTitle: string;
   questionCount: number;
   studentCount: number;
   startedLabel: string;
@@ -57,7 +57,7 @@ export function TeacherDashboard({ dashboard, bundles, authProfile }: DashboardP
           );
           return {
             session,
-            deckTitle: bundle?.deck.title ?? session.title ?? "Untitled session",
+            sessionTitle: session.title ?? bundle?.deck.title ?? "Untitled session",
             questionCount: bundle?.questions.length ?? 0,
             studentCount: snapshot?.rosterCount ?? 0,
             startedLabel: formatSessionDate(session.startedAt ?? session.createdAt)
@@ -80,7 +80,7 @@ export function TeacherDashboard({ dashboard, bundles, authProfile }: DashboardP
     const query = search.trim().toLowerCase();
     if (!query) return true;
     return (
-      row.deckTitle.toLowerCase().includes(query) ||
+      row.sessionTitle.toLowerCase().includes(query) ||
       row.session.joinCode.toLowerCase().includes(query) ||
       row.session.status.toLowerCase().includes(query)
     );
@@ -181,7 +181,7 @@ export function TeacherDashboard({ dashboard, bundles, authProfile }: DashboardP
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by title, code, or status"
+                placeholder="Search by session, code, or status"
                 className="w-full rounded-full border border-[#ebe4ff] bg-white px-4 py-2.5 text-sm text-[#2d2446] outline-none sm:w-72"
               />
               <div className="flex flex-wrap gap-2">
@@ -217,7 +217,7 @@ export function TeacherDashboard({ dashboard, bundles, authProfile }: DashboardP
                   className="grid gap-3 border-b border-[#f3eeff] px-5 py-4 text-sm text-[#4d4765] last:border-b-0 sm:grid-cols-[1.5fr_0.8fr_1fr_0.8fr_0.8fr_1.2fr] sm:items-center"
                 >
                   <div>
-                    <p className="font-semibold text-[#211b35]">{row.deckTitle}</p>
+                    <p className="font-semibold text-[#211b35]">{row.sessionTitle}</p>
                     <p className="mt-1 text-[#7a7196]">Join code {row.session.joinCode}</p>
                   </div>
                   <StatusBadge status={row.session.status} />
