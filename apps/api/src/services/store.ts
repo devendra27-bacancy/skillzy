@@ -136,6 +136,8 @@ const templateLibrary: LessonTemplate[] = [
     subject: "Product Design",
     gradeBand: "University",
     heroGradient: "linear-gradient(135deg, #2b241d 0%, #564739 100%)",
+    timer: false,
+    timerDuration: 45,
     slides: [
       {
         id: "template_slide_1",
@@ -188,6 +190,8 @@ const templateLibrary: LessonTemplate[] = [
     subject: "STEM",
     gradeBand: "K-12",
     heroGradient: "linear-gradient(135deg, #f3e9cf 0%, #fff6df 60%, #f7d87a 100%)",
+    timer: false,
+    timerDuration: 45,
     slides: [
       {
         id: "template_slide_4",
@@ -317,15 +321,29 @@ class SupabaseStoreBackend implements StoreBackend {
   }
 }
 
-function buildTemplateQuestion(slideId: string, templateSlide: TemplateSlide): Question | null {
+function buildTemplateQuestion(
+  slideId: string,
+  templateSlide: TemplateSlide,
+  templateTimerEnabled = false,
+  templateTimerDuration = 45
+): Question | null {
   const templateQuestion = templateSlide.question;
   if (!templateQuestion) return null;
+  const timer =
+    templateTimerEnabled || typeof templateQuestion.timerDuration === "number"
+      ? {
+          enabled: true,
+          durationSeconds: templateQuestion.timerDuration ?? templateTimerDuration,
+          autoAdvance: true
+        }
+      : undefined;
   const base = {
     id: createId("question"),
     slideId,
     prompt: templateQuestion.prompt,
     anonymous: templateQuestion.anonymous,
-    type: templateQuestion.type
+    type: templateQuestion.type,
+    timer
   };
 
   switch (templateQuestion.type) {
@@ -407,7 +425,12 @@ function seedDeckFromTemplate(templateId: string, classId: string): DeckBundle |
       body: templateSlide.body,
       imageUrl: templateSlide.imageUrl
     });
-    const question = buildTemplateQuestion(slideId, templateSlide);
+    const question = buildTemplateQuestion(
+      slideId,
+      templateSlide,
+      Boolean(template.timer),
+      template.timerDuration ?? 45
+    );
     if (question) questions.push(question);
   });
 
@@ -966,6 +989,8 @@ export class SkillzyStore {
       gradeBand: input.gradeBand,
       heroGradient:
         input.heroGradient ?? "linear-gradient(135deg, #f3e9cf 0%, #fff6df 60%, #f7d87a 100%)",
+      timer: input.timer ?? false,
+      timerDuration: input.timerDuration ?? 45,
       slides: input.slides.map((slide) => ({
         id: createId("template_slide"),
         title: slide.title,
@@ -977,6 +1002,7 @@ export class SkillzyStore {
               type: slide.question.type,
               prompt: slide.question.prompt,
               anonymous: slide.question.anonymous,
+              timerDuration: slide.question.timerDuration,
               config: slide.question.config
             }
           : undefined

@@ -23,6 +23,7 @@ function createEmptySlide(): CreateTemplateSlideInput {
       type: "multiple-choice",
       prompt: "",
       anonymous: true,
+      timerDuration: undefined,
       config: {
         options: ["Option 1", "Option 2"],
         allowMultiple: false,
@@ -38,6 +39,8 @@ function createEmptyTemplate(): CreateLessonTemplateInput {
     description: "",
     subject: "",
     gradeBand: "",
+    timer: false,
+    timerDuration: 45,
     slides: [createEmptySlide()]
   };
 }
@@ -52,6 +55,7 @@ type JsonTemplateQuestion = {
   slideInstructionsOrContext?: string;
   options?: string[];
   correctAnswer?: string;
+  timerDuration?: number;
 };
 
 type JsonTemplatePayload = {
@@ -60,6 +64,8 @@ type JsonTemplatePayload = {
   gradeBand?: string;
   templatePurpose?: string;
   anonymous?: boolean;
+  timer?: boolean;
+  timerDuration?: number;
   questions?: JsonTemplateQuestion[];
 };
 
@@ -72,8 +78,17 @@ function parseCorrectAnswerIndex(value: string | undefined, optionsLength: numbe
   return 0;
 }
 
+function currentTimerDuration(
+  question: Pick<CreateTemplateQuestionInput, "timerDuration"> | undefined,
+  fallback = 45
+) {
+  return question?.timerDuration ?? fallback;
+}
+
 function transformJsonTemplate(payload: JsonTemplatePayload): CreateLessonTemplateInput {
   const anonymous = payload.anonymous ?? true;
+  const timerEnabled = payload.timer ?? false;
+  const templateTimerDuration = payload.timerDuration ?? 45;
   const slides =
     payload.questions?.map((question) => {
       const options = normalizeOptions(question.options ?? []);
@@ -84,6 +99,7 @@ function transformJsonTemplate(payload: JsonTemplatePayload): CreateLessonTempla
           type: "multiple-choice" as const,
           prompt: question.questionPrompt?.trim() || "",
           anonymous,
+          timerDuration: timerEnabled ? question.timerDuration ?? templateTimerDuration : undefined,
           config: {
             options: options.length >= 2 ? options : ["Option 1", "Option 2"],
             allowMultiple: false,
@@ -98,6 +114,8 @@ function transformJsonTemplate(payload: JsonTemplatePayload): CreateLessonTempla
     subject: payload.subject?.trim() || "",
     gradeBand: payload.gradeBand?.trim() || "",
     description: payload.templatePurpose?.trim() || "",
+    timer: timerEnabled,
+    timerDuration: templateTimerDuration,
     slides
   };
 }
@@ -129,6 +147,7 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
           type: "multiple-choice",
           prompt: "",
           anonymous: true,
+          timerDuration: currentTimerDuration(undefined, customTemplate.timerDuration ?? 45),
           config: {
             options: ["Option 1", "Option 2"],
             allowMultiple: false,
@@ -221,7 +240,7 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
         <textarea
           value={jsonTemplate}
           onChange={(event) => setJsonTemplate(event.target.value)}
-          placeholder='{"templateTitle":"Easy India Quiz","subject":"General Knowledge","gradeBand":"Grades 3-5","templatePurpose":"This template is for a very easy quiz test based on India.","anonymous":true,"questions":[{"slideTitle":"Question 1","questionPrompt":"What is the capital of India?","slideInstructionsOrContext":"Choose the correct answer.","options":["New Delhi","Mumbai","Kolkata","Chennai"],"correctAnswer":"Option 1"}]}'
+          placeholder='{"templateTitle":"Easy India Quiz","subject":"General Knowledge","gradeBand":"Grades 3-5","templatePurpose":"This template is for a very easy quiz test based on India.","anonymous":true,"timer":true,"timerDuration":45,"questions":[{"slideTitle":"Question 1","questionPrompt":"What is the capital of India?","slideInstructionsOrContext":"Choose the correct answer.","options":["New Delhi","Mumbai","Kolkata","Chennai"],"correctAnswer":"Option 1"}]}'
           className="mt-4 min-h-56 w-full rounded-[1.3rem] border border-[#ebe4ff] bg-white px-4 py-3 font-mono text-sm text-[#1a1630] outline-none placeholder:text-[#8a82a2]"
         />
         <div className="mt-4 flex flex-wrap gap-3">
@@ -285,6 +304,49 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
             onChange={(event) => setCustomTemplate((current) => ({ ...current, description: event.target.value }))}
             placeholder="What is this template for?"
             className={fieldClassName}
+          />
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-[auto_12rem]">
+          <label className="flex items-center gap-2 rounded-[1.1rem] border border-[#ebe4ff] bg-white px-4 py-3 text-sm text-[#6d6585]">
+            <input
+              type="checkbox"
+              checked={Boolean(customTemplate.timer)}
+              onChange={(event) =>
+                setCustomTemplate((current) => ({
+                  ...current,
+                  timer: event.target.checked,
+                  timerDuration: current.timerDuration ?? 45,
+                  slides: current.slides.map((slide) => ({
+                    ...slide,
+                    question: slide.question
+                      ? {
+                          ...slide.question,
+                          timerDuration: event.target.checked
+                            ? slide.question.timerDuration ?? current.timerDuration ?? 45
+                            : undefined
+                        }
+                      : slide.question
+                  }))
+                }))
+              }
+            />
+            Time-based quiz mode
+          </label>
+          <input
+            type="number"
+            min={5}
+            max={300}
+            value={customTemplate.timerDuration ?? 45}
+            onChange={(event) =>
+              setCustomTemplate((current) => ({
+                ...current,
+                timerDuration: Number(event.target.value) || 45
+              }))
+            }
+            disabled={!customTemplate.timer}
+            placeholder="45"
+            className={`${fieldClassName} disabled:cursor-not-allowed disabled:opacity-60`}
           />
         </div>
 
@@ -480,6 +542,37 @@ export function TeacherTemplatesPanel({ dashboard }: { dashboard: DashboardData 
                     Multi select
                   </label>
                 </div>
+
+                {customTemplate.timer ? (
+                  <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
+                    <input
+                      type="number"
+                      min={5}
+                      max={300}
+                      value={question?.timerDuration ?? customTemplate.timerDuration ?? 45}
+                      onChange={(event) =>
+                        updateQuestion(index, (current) => ({
+                          ...current,
+                          timerDuration: Number(event.target.value) || customTemplate.timerDuration || 45
+                        }))
+                      }
+                      placeholder="Timer duration in seconds"
+                      className={fieldClassName}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateQuestion(index, (current) => ({
+                          ...current,
+                          timerDuration: customTemplate.timerDuration ?? 45
+                        }))
+                      }
+                      className="rounded-full border border-[#ebe4ff] px-4 py-3 text-sm font-semibold text-[#2d2446]"
+                    >
+                      Use default timer
+                    </button>
+                  </div>
+                ) : null}
               </div>
             );
           })}

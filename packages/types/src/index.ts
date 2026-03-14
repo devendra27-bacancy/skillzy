@@ -290,6 +290,7 @@ export interface TemplateQuestion {
   type: QuestionType;
   prompt: string;
   anonymous: boolean;
+  timerDuration?: number;
   config: Record<string, unknown>;
 }
 
@@ -308,6 +309,8 @@ export interface LessonTemplate {
   subject: string;
   gradeBand: string;
   heroGradient: string;
+  timer?: boolean;
+  timerDuration?: number;
   slides: TemplateSlide[];
 }
 
@@ -315,6 +318,7 @@ export interface CreateTemplateQuestionInput {
   type: Extract<QuestionType, "multiple-choice" | "text" | "drawing" | "rating-scale" | "image-hotspot" | "drag-rank">;
   prompt: string;
   anonymous: boolean;
+  timerDuration?: number;
   config: Record<string, unknown>;
 }
 
@@ -331,6 +335,8 @@ export interface CreateLessonTemplateInput {
   subject: string;
   gradeBand: string;
   heroGradient?: string;
+  timer?: boolean;
+  timerDuration?: number;
   slides: CreateTemplateSlideInput[];
 }
 
