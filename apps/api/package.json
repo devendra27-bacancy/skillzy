@@ -12,8 +12,8 @@
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.2",
-    "@skillzy/shared": "0.1.0",
-    "@skillzy/types": "0.1.0",
+    "@skillzy/shared": "file:../../packages/shared",
+    "@skillzy/types": "file:../../packages/types",
     "@supabase/supabase-js": "^2.99.1",
     "fastify": "^5.2.1",
     "socket.io": "^4.8.1",
