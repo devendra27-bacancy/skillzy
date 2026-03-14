@@ -1,0 +1,64 @@
+export function getMascotSvg({ compact = false }: { compact?: boolean } = {}) {
+  if (compact) {
+    return `
+      <svg width="512" height="512" viewBox="70 70 372 372" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="78" y="78" width="356" height="356" rx="88" fill="#FCFCFF"/>
+        <path d="M96 186L244 118C254 114 266 114 276 118L408 178C426 186 428 210 412 221L279 309C267 317 251 317 239 309L94 208C78 199 79 177 96 186Z" fill="#8DBFE4" stroke="#40457D" stroke-width="12"/>
+        <path d="M161 212C161 179 188 152 221 152H291C324 152 351 179 351 212V316C351 372 307 418 251 418H261C205 418 161 372 161 316V212Z" fill="#AEE8C3" stroke="#40457D" stroke-width="12"/>
+        <path d="M198 194H314C330 194 343 207 343 223V252H169V223C169 207 182 194 198 194Z" fill="#8DCBE0"/>
+        <path d="M214 184V248" stroke="#FFE18A" stroke-width="14" stroke-linecap="round"/>
+        <circle cx="210" cy="298" r="32" fill="#40457D"/>
+        <circle cx="302" cy="298" r="32" fill="#40457D"/>
+        <circle cx="198" cy="290" r="11" fill="#FCFCFF"/>
+        <circle cx="291" cy="290" r="11" fill="#FCFCFF"/>
+        <circle cx="224" cy="314" r="6" fill="#FCFCFF"/>
+        <path d="M236 339C244 350 268 350 276 339" stroke="#40457D" stroke-width="10" stroke-linecap="round"/>
+        <ellipse cx="182" cy="340" rx="16" ry="10" fill="#FFB985"/>
+        <ellipse cx="330" cy="340" rx="16" ry="10" fill="#FFB985"/>
+        <path d="M360 304H398L372 350H400L353 419L366 367H332L360 304Z" fill="#FFD88C" stroke="#40457D" stroke-width="12" stroke-linejoin="round"/>
+      </svg>
+    `.trim();
+  }
+
+  return `
+    <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" rx="112" fill="#FCFCFF"/>
+      <ellipse cx="258" cy="420" rx="96" ry="18" fill="#D7DFEA"/>
+      <path d="M88 176L244 100C255 95 267 95 278 100L424 170C442 178 444 202 428 213L279 309C267 317 251 317 239 309L86 198C69 189 70 167 88 176Z" fill="#8DBFE4" stroke="#40457D" stroke-width="12"/>
+      <path d="M118 178L244 118C254 114 266 114 276 118L394 171" stroke="#BDECC7" stroke-width="10" stroke-linecap="round"/>
+      <path d="M143 191L185 173" stroke="#FFE28A" stroke-width="10" stroke-linecap="round"/>
+      <path d="M128 203L162 188" stroke="#FFE28A" stroke-width="10" stroke-linecap="round"/>
+      <path d="M132 196V266" stroke="#40457D" stroke-width="12" stroke-linecap="round"/>
+      <path d="M132 194C132 176 147 162 165 162" stroke="#40457D" stroke-width="12" stroke-linecap="round"/>
+      <circle cx="132" cy="274" r="22" fill="#FFD67A" stroke="#40457D" stroke-width="12"/>
+      <path d="M126 296H138L148 350C149 357 144 364 137 364H127C120 364 115 357 116 350L126 296Z" fill="#FFDFA0" stroke="#40457D" stroke-width="12"/>
+      <path d="M161 204C161 171 188 144 221 144H291C324 144 351 171 351 204V316C351 372 307 418 251 418H261C205 418 161 372 161 316V204Z" fill="#AEE8C3" stroke="#40457D" stroke-width="12"/>
+      <path d="M198 186H314C330 186 343 199 343 215V246H169V215C169 199 182 186 198 186Z" fill="#8DCBE0"/>
+      <path d="M214 176V240" stroke="#FFE18A" stroke-width="14" stroke-linecap="round"/>
+      <circle cx="210" cy="292" r="32" fill="#40457D"/>
+      <circle cx="302" cy="292" r="32" fill="#40457D"/>
+      <circle cx="198" cy="284" r="11" fill="#FCFCFF"/>
+      <circle cx="291" cy="284" r="11" fill="#FCFCFF"/>
+      <circle cx="224" cy="308" r="6" fill="#FCFCFF"/>
+      <path d="M236 333C244 344 268 344 276 333" stroke="#40457D" stroke-width="10" stroke-linecap="round"/>
+      <path d="M194 246C208 238 223 238 237 246" stroke="#40457D" stroke-width="10" stroke-linecap="round"/>
+      <path d="M275 246C289 238 304 238 318 246" stroke="#40457D" stroke-width="10" stroke-linecap="round"/>
+      <ellipse cx="182" cy="334" rx="16" ry="10" fill="#FFB985"/>
+      <ellipse cx="330" cy="334" rx="16" ry="10" fill="#FFB985"/>
+      <path d="M199 405L208 448C210 458 202 468 192 468C184 468 177 462 175 454L163 403" fill="#AEE8C3"/>
+      <path d="M313 405L304 448C302 458 310 468 320 468C328 468 335 462 337 454L349 403" fill="#AEE8C3"/>
+      <path d="M199 405L208 448C210 458 202 468 192 468C184 468 177 462 175 454L163 403" stroke="#40457D" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M313 405L304 448C302 458 310 468 320 468C328 468 335 462 337 454L349 403" stroke="#40457D" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M152 370L132 390C126 396 117 398 109 396C100 393 94 385 94 376V281" stroke="#AEE8C3" stroke-width="12" stroke-linecap="round"/>
+      <path d="M152 370L132 390C126 396 117 398 109 396C100 393 94 385 94 376V281" stroke="#40457D" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M360 304H398L372 350H400L353 419L366 367H332L360 304Z" fill="#FFD88C" stroke="#40457D" stroke-width="12" stroke-linejoin="round"/>
+      <path d="M389 286L398 299" stroke="#FFBD78" stroke-width="8" stroke-linecap="round"/>
+      <path d="M426 314L437 308" stroke="#FFBD78" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="399" cy="312" r="18" fill="#AEE8C3" stroke="#40457D" stroke-width="12"/>
+    </svg>
+  `.trim();
+}
+
+export function getMascotSvgDataUrl(options?: { compact?: boolean }) {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(getMascotSvg(options))}`;
+}

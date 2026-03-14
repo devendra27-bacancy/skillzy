@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(255, 205, 87, 0.16), transparent 32%),
+    linear-gradient(180deg, #342c24 0%, #241d17 100%);
+  color: #fffdf7;
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.loading-brand-bar {
+  animation: loading-brand-slide 1.2s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+@keyframes loading-brand-slide {
+  0%,
+  100% {
+    transform: translateX(-65%);
+  }
+
+  50% {
+    transform: translateX(140%);
+  }
+}
+
+.cream-panel {
+  background: linear-gradient(180deg, #fdf5e0 0%, #f4e8c5 100%);
+  color: #171411;
+  box-shadow: 0 24px 60px rgba(18, 12, 8, 0.18);
+}
+
+.ticket-notch::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 80px;
+  height: 28px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  border: 6px solid #342c24;
+  background: #fdf5e0;
+}
