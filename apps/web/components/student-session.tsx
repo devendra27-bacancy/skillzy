@@ -1,7 +1,7 @@
 "use client";
 
 import type { Question, SessionSnapshot } from "@skillzy/types";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { socket } from "../lib/socket";
 import { CreamCard } from "./shell";
@@ -137,7 +137,9 @@ export function StudentSession({
   const [hotspotAnswer, setHotspotAnswer] = useState({ x: 50, y: 50 });
   const [rankAnswer, setRankAnswer] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const questionStartedAtRef = useRef<number | null>(null);
 
   const participantId =
     typeof window !== "undefined" ? localStorage.getItem("skillzyParticipantId") ?? "" : "";
@@ -190,6 +192,7 @@ export function StudentSession({
 
   useEffect(() => {
     setSubmitted(hasAnsweredCurrentQuestion);
+    setAdvancing(false);
     setTextAnswer("");
     setMcqAnswer([]);
     setDrawingAnswer(drawPlaceholder());
@@ -199,26 +202,33 @@ export function StudentSession({
   }, [activeQuestion?.id, hasAnsweredCurrentQuestion]);
 
   useEffect(() => {
+    questionStartedAtRef.current = activeQuestion ? Date.now() : null;
+  }, [activeQuestion?.id]);
+
+  useEffect(() => {
     if (!timedSession || !activeQuestion || snapshot.session.status !== "live") {
       setTimeRemaining(null);
       return;
     }
 
     const duration = getQuestionDuration(activeQuestion);
-    const startedAt = Date.now();
 
     const tick = () => {
+      const startedAt = questionStartedAtRef.current ?? Date.now();
       const remaining = duration - (Date.now() - startedAt) / 1000;
       setTimeRemaining(Math.max(0, remaining));
-      if (remaining <= 0 && !submitted) {
-        void advanceToNextQuestion(currentQuestionIndex + 1);
+      if (remaining <= 0 && !hasAnsweredCurrentQuestion && !advancing) {
+        setAdvancing(true);
+        void advanceToNextQuestion(currentQuestionIndex + 1).finally(() => {
+          setAdvancing(false);
+        });
       }
     };
 
     tick();
     const interval = window.setInterval(tick, 100);
     return () => window.clearInterval(interval);
-  }, [activeQuestion?.id, currentQuestionIndex, snapshot.session.status, submitted, timedSession]);
+  }, [activeQuestion?.id, advancing, currentQuestionIndex, hasAnsweredCurrentQuestion, snapshot.session.status, timedSession]);
 
   async function advanceToNextQuestion(nextIndex: number) {
     if (!participantId) return;
@@ -299,7 +309,7 @@ export function StudentSession({
   }, [orderedQuestions, participantResponses, snapshot.session.revealResults, snapshot.session.status]);
 
   async function submit() {
-    if (!activeQuestion || !participantId || submitted) return;
+    if (!activeQuestion || !participantId || submitted || advancing) return;
 
     const payload =
       isChoiceQuestion(activeQuestion)
@@ -329,8 +339,9 @@ export function StudentSession({
       type: activeQuestion.type,
       payload
     });
-    setSubmitted(true);
+    setAdvancing(true);
     await advanceToNextQuestion(currentQuestionIndex + 1);
+    setAdvancing(false);
   }
 
   const progressPercent =
@@ -424,7 +435,7 @@ export function StudentSession({
 
           <QuestionResponseForm
             question={activeQuestion}
-            disabled={submitted || snapshot.session.status !== "live"}
+            disabled={submitted || advancing || snapshot.session.status !== "live"}
             textAnswer={textAnswer}
             setTextAnswer={setTextAnswer}
             mcqAnswer={mcqAnswer}
@@ -438,17 +449,22 @@ export function StudentSession({
             rankAnswer={rankAnswer}
             setRankAnswer={setRankAnswer}
           />
-          {submitted ? (
+          {advancing ? (
             <div className="mt-5 rounded-[1.5rem] bg-[#e7f6ec] p-4 text-sm text-[#235a35]">
               Answer saved. Moving you forward without waiting for the rest of the class.
             </div>
           ) : null}
           <button
             onClick={submit}
-            disabled={submitted || snapshot.session.status !== "live" || (isChoiceQuestion(activeQuestion) && mcqAnswer.length === 0)}
+            disabled={
+              submitted ||
+              advancing ||
+              snapshot.session.status !== "live" ||
+              (isChoiceQuestion(activeQuestion) && mcqAnswer.length === 0)
+            }
             className="mt-5 w-full rounded-full bg-skillzy-ink px-5 py-4 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitted ? "Response submitted" : "Submit response"}
+            {advancing ? "Moving ahead..." : submitted ? "Response submitted" : "Submit response"}
           </button>
         </CreamCard>
       ) : (
