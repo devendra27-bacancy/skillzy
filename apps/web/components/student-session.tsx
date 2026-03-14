@@ -162,6 +162,9 @@ export function StudentSession({
     ? snapshot.slides.find((slide) => slide.id === activeQuestion.slideId) ?? snapshot.slides[snapshot.session.currentSlideIndex]
     : snapshot.slides[snapshot.session.currentSlideIndex];
   const participantResponses = snapshot.responses.filter((response) => response.participantId === participantId);
+  const hasAnsweredCurrentQuestion = Boolean(
+    activeQuestion && participantResponses.some((response) => response.questionId === activeQuestion.id)
+  );
   const timedSession =
     Boolean(snapshot.session.timerMode) ||
     (orderedQuestions.length > 0 && orderedQuestions.every((question) => Boolean(question.timer?.enabled)));
@@ -186,16 +189,14 @@ export function StudentSession({
   }, [sessionId]);
 
   useEffect(() => {
-    setSubmitted(
-      Boolean(activeQuestion && participantResponses.some((response) => response.questionId === activeQuestion.id))
-    );
+    setSubmitted(hasAnsweredCurrentQuestion);
     setTextAnswer("");
     setMcqAnswer([]);
     setDrawingAnswer(drawPlaceholder());
     setRatingAnswer(0);
     setHotspotAnswer({ x: 50, y: 50 });
     setRankAnswer(activeQuestion?.type === "drag-rank" ? [...activeQuestion.items] : []);
-  }, [activeQuestion?.id, participantResponses]);
+  }, [activeQuestion?.id, hasAnsweredCurrentQuestion]);
 
   useEffect(() => {
     if (!timedSession || !activeQuestion || snapshot.session.status !== "live") {
