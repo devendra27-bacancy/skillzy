@@ -149,10 +149,19 @@ export function StudentSession({
             : "Connection lost. Trying to reconnect now."}
         </div>
       ) : null}
-      <CreamCard className="ticket-notch pt-10">
-        <p className="text-sm uppercase tracking-[0.25em] text-skillzy-soft">Live class</p>
-        <h1 className="mt-2 text-3xl font-semibold">{snapshot.deck.title}</h1>
-        <p className="mt-2 text-skillzy-soft">{currentSlide?.body}</p>
+      <CreamCard className="ticket-notch px-5 pb-5 pt-8">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.22em] text-skillzy-soft">Live class</p>
+            <h1 className="mt-1 line-clamp-2 text-xl font-semibold leading-tight">{snapshot.deck.title}</h1>
+          </div>
+          <span className="shrink-0 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-skillzy-soft">
+            Slide {snapshot.session.currentSlideIndex + 1}
+          </span>
+        </div>
+        {currentSlide?.body ? (
+          <p className="mt-2 line-clamp-2 text-sm text-skillzy-soft">{currentSlide.body}</p>
+        ) : null}
       </CreamCard>
 
       {activeQuestion ? (

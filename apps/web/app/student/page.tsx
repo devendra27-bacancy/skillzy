@@ -47,7 +47,7 @@ export default async function StudentPage() {
         <SignOutButton />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div>
         <CreamCard className="ticket-notch pt-10">
           <p className="text-sm uppercase tracking-[0.25em] text-skillzy-soft">Quick join</p>
           <h2 className="mt-2 text-3xl font-semibold">Enter a live class</h2>
@@ -58,28 +58,6 @@ export default async function StudentPage() {
             <StudentJoinForm />
           </div>
         </CreamCard>
-
-        <div className="space-y-6">
-          <CreamCard>
-            <p className="text-sm uppercase tracking-[0.25em] text-skillzy-soft">Profile</p>
-            <div className="mt-4 rounded-[1.5rem] bg-white/70 p-4">
-              <p className="text-sm text-skillzy-soft">Email</p>
-              <p className="mt-1 text-lg font-semibold">{authUser.email}</p>
-            </div>
-          </CreamCard>
-
-          <CreamCard>
-            <p className="text-sm uppercase tracking-[0.25em] text-skillzy-soft">Student dashboard</p>
-            <ul className="mt-4 space-y-3">
-              <li className="rounded-[1.5rem] bg-white/70 p-4">
-                Participation history will appear here once we bind Supabase users to session records.
-              </li>
-              <li className="rounded-[1.5rem] bg-white/70 p-4">
-                Saved classes, streaks, and progress summaries are the next student-facing milestone.
-              </li>
-            </ul>
-          </CreamCard>
-        </div>
       </div>
     </AppShell>
   );
