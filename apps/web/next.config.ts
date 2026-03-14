@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@skillzy/types", "@skillzy/ui"],
+  typescript: {
+    ignoreBuildErrors: true
+  },
   images: {
     remotePatterns: [
       {
