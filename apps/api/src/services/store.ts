@@ -396,8 +396,12 @@ function buildTemplateQuestion(
   }
 }
 
-function seedDeckFromTemplate(templateId: string, classId: string): DeckBundle | null {
-  const template = templateLibrary.find((item) => item.id === templateId);
+function seedDeckFromTemplate(
+  templateId: string,
+  classId: string,
+  templates: LessonTemplate[] = templateLibrary
+): DeckBundle | null {
+  const template = templates.find((item) => item.id === templateId);
   if (!template) return null;
 
   const deck: Deck = {
@@ -1059,7 +1063,7 @@ export class SkillzyStore {
   async createDeck(input: CreateDeckInput) {
     const state = await this.ensureReady();
     if (input.templateId) {
-      const seeded = seedDeckFromTemplate(input.templateId, input.classId);
+      const seeded = seedDeckFromTemplate(input.templateId, input.classId, state.templates);
       if (seeded) {
         state.decks.push(seeded.deck);
         state.slides.push(...seeded.slides);
@@ -1156,7 +1160,7 @@ export class SkillzyStore {
     let targetDeckId = input.deckId;
 
     if (!targetDeckId && input.templateId) {
-      const seeded = seedDeckFromTemplate(input.templateId, input.classId);
+      const seeded = seedDeckFromTemplate(input.templateId, input.classId, state.templates);
       if (seeded) {
         state.decks.push(seeded.deck);
         state.slides.push(...seeded.slides);
