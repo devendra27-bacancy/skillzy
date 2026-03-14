@@ -311,6 +311,29 @@ export interface LessonTemplate {
   slides: TemplateSlide[];
 }
 
+export interface CreateTemplateQuestionInput {
+  type: Extract<QuestionType, "multiple-choice" | "text" | "drawing" | "rating-scale" | "image-hotspot" | "drag-rank">;
+  prompt: string;
+  anonymous: boolean;
+  config: Record<string, unknown>;
+}
+
+export interface CreateTemplateSlideInput {
+  title: string;
+  body: string;
+  imageUrl?: string;
+  question?: CreateTemplateQuestionInput;
+}
+
+export interface CreateLessonTemplateInput {
+  title: string;
+  description: string;
+  subject: string;
+  gradeBand: string;
+  heroGradient?: string;
+  slides: CreateTemplateSlideInput[];
+}
+
 export interface ImportJob {
   id: string;
   deckId?: string;

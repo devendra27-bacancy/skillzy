@@ -7,6 +7,7 @@ import type {
   ClassRoom,
   CreateClassInput,
   CreateDeckInput,
+  CreateLessonTemplateInput,
   CreateQuestionInput,
   CreateSessionInput,
   CreateSlideInput,
@@ -953,6 +954,37 @@ export class SkillzyStore {
   async listTemplates() {
     const state = await this.ensureReady();
     return state.templates;
+  }
+
+  async createTemplate(input: CreateLessonTemplateInput) {
+    const state = await this.ensureReady();
+    const template: LessonTemplate = {
+      id: createId("template"),
+      title: input.title,
+      description: input.description,
+      subject: input.subject,
+      gradeBand: input.gradeBand,
+      heroGradient:
+        input.heroGradient ?? "linear-gradient(135deg, #f3e9cf 0%, #fff6df 60%, #f7d87a 100%)",
+      slides: input.slides.map((slide) => ({
+        id: createId("template_slide"),
+        title: slide.title,
+        body: slide.body,
+        imageUrl: slide.imageUrl,
+        question: slide.question
+          ? {
+              id: createId("template_question"),
+              type: slide.question.type,
+              prompt: slide.question.prompt,
+              anonymous: slide.question.anonymous,
+              config: slide.question.config
+            }
+          : undefined
+      }))
+    };
+    state.templates.unshift(template);
+    await this.persist();
+    return template;
   }
 
   async queueImport(fileName: string, source: ImportJob["source"]) {

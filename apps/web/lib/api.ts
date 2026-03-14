@@ -2,6 +2,7 @@ import type {
   ApiResult,
   CreateClassInput,
   CreateDeckInput,
+  CreateLessonTemplateInput,
   CreateQuestionInput,
   CreateSessionInput,
   CreateSlideInput,
@@ -52,6 +53,8 @@ export const api = {
   dashboard: () => request<DashboardData>("/api/dashboard"),
   listDecks: () => request<DeckBundle[]>("/api/decks"),
   listTemplates: () => request<LessonTemplate[]>("/api/templates"),
+  createTemplate: (input: CreateLessonTemplateInput) =>
+    request<LessonTemplate>("/api/templates", { method: "POST", body: JSON.stringify(input) }),
   createClass: (input: CreateClassInput) =>
     request("/api/classes", { method: "POST", body: JSON.stringify(input) }),
   createDeck: (input: CreateDeckInput) =>
